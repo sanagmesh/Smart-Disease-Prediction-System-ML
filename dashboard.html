@@ -1,0 +1,1862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Disease Prediction Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    @keyframes scroll-left {
+      0% { transform: translateX(100%); }
+      100% { transform: translateX(-100%); }
+    }
+    .scroll-text {
+      display: inline-block;
+      white-space: nowrap;
+      animation: scroll-left 15s linear infinite;
+    }
+    .fade-section {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    .fade-section.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .risk-low { color: #f59e0b; }
+    .risk-normal { color: #10b981; }
+    .risk-high { color: #ef4444; }
+
+
+    /* NEW: Profile picture styles */
+    .profile-pic-upload {
+      position: relative;
+      cursor: pointer;
+    }
+    .profile-pic-upload:hover .upload-overlay {
+      opacity: 1;
+    }
+    .upload-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.6);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+    }
+    .modal.active {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+
+    /* Existing styles... keep all your current styles */
+
+    /* ADD THESE NEW STYLES AT THE END */
+
+    /* Sidebar animation on menu item click */
+    .menu-item-active {
+      background: linear-gradient(90deg, #1e40af 0%, #3b82f6 100%);
+      transform: translateX(8px);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Fluctuating/pulsing effect on click */
+    @keyframes menuPulse {
+      0%, 100% { transform: translateX(0) scale(1); }
+      25% { transform: translateX(8px) scale(1.05); }
+      50% { transform: translateX(4px) scale(1.02); }
+      75% { transform: translateX(8px) scale(1.05); }
+    }
+
+    .menu-pulse {
+      animation: menuPulse 0.6s ease-in-out;
+    }
+
+    /* Ripple effect */
+    .ripple {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ripple::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.5);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .ripple:active::after {
+      width: 300px;
+      height: 300px;
+    }
+
+    /* Sidebar slide animation */
+    .sidebar-enter {
+      animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(-100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    /* Mobile responsive adjustments */
+    @media (max-width: 1023px) {
+      #sidebar {
+        width: 280px;
+        max-width: 85vw;
+      }
+      
+      main {
+        margin-left: 0 !important;
+      }
+    }
+
+    /* Icon bounce on hover */
+    .menu-icon {
+      display: inline-block;
+      transition: transform 0.3s ease;
+    }
+
+    .menu-item:hover .menu-icon {
+      transform: scale(1.2) rotate(5deg);
+    }
+
+
+
+  </style>
+</head>
+
+<body class="bg-gradient-to-br from-blue-50 via-white to-blue-50 text-gray-800 font-sans">
+
+  <!-- Navbar -->
+  <header class="bg-blue-900 text-white flex justify-between items-center px-6 py-4 shadow-xl sticky top-0 z-50">
+    <div class="overflow-hidden w-2/3">
+      <div class="scroll-text flex items-center gap-3">
+        <img src="/static/images/logo.png" alt="Logo" class="w-10 h-10 rounded-full" />
+        <p class="font-semibold text-lg">Smart Disease Prediction - Safety First with Single Drop of Blood</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-6">
+      <div class="flex items-center gap-3">
+        <!-- MODIFIED: Profile picture with click functionality -->
+        <div class="profile-pic-upload" onclick="openSection('account')">
+          <img id="userProfilePic" src="https://ui-avatars.com/api/?name=User&background=3b82f6&color=fff&size=128" 
+               alt="Profile" class="w-11 h-11 rounded-full border-3 border-white shadow-lg cursor-pointer hover:scale-110 transition-transform" />
+          <div class="upload-overlay">
+            <span class="text-white text-xs">Edit</span>
+          </div>
+        </div>
+        
+        <div class="hidden md:block">
+          <p class="text-sm font-medium opacity-90">Welcome,</p>
+          <p class="text-base font-bold" id="username">{{ user_name }}</p>
+        </div>
+      </div>
+
+      <button onclick="logout()" 
+              class="bg-red-500 hover:bg-red-600 px-5 py-2 rounded-lg text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all">
+        Logout
+      </button>
+    </div>
+  </header>
+
+   </header>
+
+  <!-- ADD THIS: Mobile Menu Toggle Button -->
+  <button id="mobileMenuBtn" class="lg:hidden fixed bottom-6 right-6 z-50 bg-blue-600 text-white p-4 rounded-full shadow-2xl hover:bg-blue-700 transition-all">
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+    </svg>
+  </button>
+
+
+  <div class="flex min-h-screen">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="bg-blue-900 text-white w-72 p-6 space-y-2 shadow-2xl fixed lg:static h-full z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
+      <div class="mb-8">
+        <h3 class="text-xl font-bold text-blue-200 mb-2">Dashboard Menu</h3>
+        <div class="h-1 w-16 bg-blue-400 rounded"></div>
+      </div>
+
+      <ul class="space-y-3 font-medium">
+        <li><a href="#" class="menu-item flex items-center gap-3 p-3 hover:bg-blue-700 rounded-lg transition-all group ripple" onclick="openSection('home'); animateMenuItem(this)">
+            <span class="text-xl menu-icon">🏠</span>
+            <span class="group-hover:translate-x-1 transition-transform">Home / Overview</span></a></li>
+        
+        <li><a href="#" class="menu-item flex items-center gap-3 p-3 hover:bg-blue-700 rounded-lg transition-all group ripple" onclick="openSection('disease'); animateMenuItem(this)">
+            <span class="text-xl menu-icon">🧪</span>
+            <span class="group-hover:translate-x-1 transition-transform">Disease Prediction</span></a></li>
+        
+        <li><a href="#" class="menu-item flex items-center gap-3 p-3 hover:bg-blue-700 rounded-lg transition-all group ripple" onclick="openSection('reports'); animateMenuItem(this)">
+            <span class="text-xl menu-icon">📈</span>
+            <span class="group-hover:translate-x-1 transition-transform">Reports</span></a></li>
+        
+        <li><a href="#" class="menu-item flex items-center gap-3 p-3 hover:bg-blue-700 rounded-lg transition-all group ripple" onclick="openSection('previous'); animateMenuItem(this)">
+            <span class="text-xl menu-icon">📋</span>
+            <span class="group-hover:translate-x-1 transition-transform">Previous Results</span></a></li>
+        
+        <li><a href="#" class="menu-item flex items-center gap-3 p-3 hover:bg-blue-700 rounded-lg transition-all group ripple" onclick="openSection('account'); animateMenuItem(this)">
+            <span class="text-xl menu-icon">👤</span>
+            <span class="group-hover:translate-x-1 transition-transform">Account Settings</span></a></li>
+        
+        <li><a href="#" class="menu-item flex items-center gap-3 p-3 hover:bg-blue-700 rounded-lg transition-all group ripple" onclick="openSection('downloads'); animateMenuItem(this)">
+            <span class="text-xl menu-icon">📤</span>
+            <span class="group-hover:translate-x-1 transition-transform">Download Center</span></a></li>
+        
+        <li><a href="#" class="menu-item flex items-center gap-3 p-3 hover:bg-blue-700 rounded-lg transition-all group ripple" onclick="openSection('ai'); animateMenuItem(this)">
+            <span class="text-xl menu-icon">💡</span>
+            <span class="group-hover:translate-x-1 transition-transform">AI Insights</span></a></li>
+        
+        <li><a href="#" class="menu-item flex items-center gap-3 p-3 hover:bg-blue-700 rounded-lg transition-all group ripple" onclick="openSection('support'); animateMenuItem(this)">
+            <span class="text-xl menu-icon">💬</span>
+            <span class="group-hover:translate-x-1 transition-transform">Support / Message Admin</span></a></li>
+      </ul>
+    </aside>
+
+    </aside>
+
+    <!-- ADD THIS: Mobile Overlay -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden lg:hidden"></div>
+
+
+    <!-- Main Content -->
+    <main class="flex-1 p-6 w-full lg:ml-0">
+
+      <!-- Home Section -->
+      <section id="home" class="fade-section active">
+        <h2 class="text-2xl font-bold text-[#0a4b78] mb-4">Welcome to Smart Disease Prediction</h2>
+        <p class="mb-4 text-gray-700">Analyze your health trends and get instant predictions using one drop of blood.</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+          <div class="bg-white shadow-md rounded-xl p-4 text-center">
+            <h3 class="text-lg font-semibold">Total Predictions</h3>
+            <p class="text-2xl font-bold text-[#0a4b78]" id="total-pred">0</p>
+          </div>
+          <div class="bg-white shadow-md rounded-xl p-4 text-center">
+            <h3 class="text-lg font-semibold">Detected Diseases</h3>
+            <p class="text-2xl font-bold text-[#0a4b78]" id="disease-count">0</p>
+          </div>
+          <div class="bg-white shadow-md rounded-xl p-4 text-center">
+            <h3 class="text-lg font-semibold">Normal Reports</h3>
+            <p class="text-2xl font-bold text-[#0a4b78]" id="normal-count">0</p>
+          </div>
+        </div>
+
+        <!-- NEW: Three Pie Charts -->
+        <div class="mt-8">
+          <h3 class="text-xl font-bold text-blue-900 mb-4">Prediction Analytics - Distribution</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Pie Chart 1: Total Predictions Breakdown -->
+            <div class="bg-white shadow-xl rounded-2xl p-6">
+              <h4 class="text-center font-semibold text-gray-700 mb-4">Total Predictions</h4>
+              <canvas id="pieChart1"></canvas>
+            </div>
+            
+            <!-- Pie Chart 2: Disease Distribution -->
+            <div class="bg-white shadow-xl rounded-2xl p-6">
+              <h4 class="text-center font-semibold text-gray-700 mb-4">Disease vs Normal</h4>
+              <canvas id="pieChart2"></canvas>
+            </div>
+            
+            <!-- Pie Chart 3: Status Overview -->
+            <div class="bg-white shadow-xl rounded-2xl p-6">
+              <h4 class="text-center font-semibold text-gray-700 mb-4">Health Status</h4>
+              <canvas id="pieChart3"></canvas>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Disease Prediction Section -->
+      <section id="disease" class="fade-section hidden">
+        <div class="mb-8">
+          <h2 class="text-4xl font-bold text-blue-900 mb-2">Disease Prediction</h2>
+          <p class="text-gray-600 text-lg">Enter blood parameters manually or use sensor input for instant analysis</p>
+        </div>
+
+        <div class="flex flex-col md:flex-row gap-6">
+          <button onclick="manualInput()" class="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-semibold py-4 px-8 rounded-xl shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all">
+            📝 Manual Input</button>
+          <button onclick="sensorInput()" class="bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white font-semibold py-4 px-8 rounded-xl shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all">
+            🔬 Sensor Input</button>
+        </div>
+
+        <!-- Manual Input Form -->
+        <div id="manualInputForm" class="hidden mt-8 mx-auto max-w-4xl bg-white shadow-lg rounded-xl p-6">
+          <h2 class="text-xl font-semibold text-center mb-6 text-gray-800">Enter Blood Parameters</h2>
+  
+          <form id="bloodForm" class="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div><label>Glucose (70-110 mg/dL)</label><input type="number" name="Glucose" class="w-full border rounded p-2"></div>
+            <div><label>Cholesterol (125-200 mg/dL)</label><input type="number" name="Cholesterol" class="w-full border rounded p-2"></div>
+            <div><label>Hemoglobin (13.5-17.5 g/dL)</label><input type="number" name="Hemoglobin" class="w-full border rounded p-2"></div>
+            <div><label>Platelets (150k-450k/µL)</label><input type="number" name="Platelets" class="w-full border rounded p-2"></div>
+            <div><label>WBC (4k-11k/µL)</label><input type="number" name="WBC" class="w-full border rounded p-2"></div>
+            <div><label>RBC (4.7-6.1 million/µL)</label><input type="number" name="RBC" class="w-full border rounded p-2"></div>
+            <div><label>Hematocrit (38-50%)</label><input type="number" name="Hematocrit" class="w-full border rounded p-2"></div>
+            <div><label>MCV (80-100 fL)</label><input type="number" name="MCV" class="w-full border rounded p-2"></div>
+            <div><label>MCH (27-33 pg)</label><input type="number" name="MCH" class="w-full border rounded p-2"></div>
+            <div><label>MCHC (32-36 g/dL)</label><input type="number" name="MCHC" class="w-full border rounded p-2"></div>
+            <div><label>Insulin (2-25 µU/mL)</label><input type="number" name="Insulin" class="w-full border rounded p-2"></div>
+            <div><label>BMI (18.5-24.9)</label><input type="number" name="BMI" class="w-full border rounded p-2"></div>
+            <div><label>Systolic BP (90-120 mmHg)</label><input type="number" name="Blood Pressure - Systolic" class="w-full border rounded p-2"></div>
+            <div><label>Diastolic BP (60-80 mmHg)</label><input type="number" name="Blood Pressure - Diastolic" class="w-full border rounded p-2"></div>
+            <div><label>Triglycerides (norm-150 mg/dL)</label><input type="number" name="Triglycerides" class="w-full border rounded p-2"></div>
+            <div><label>HbA1c (norm-5.7%)</label><input type="number" name="HbA1c" class="w-full border rounded p-2"></div>
+            <div><label>LDL (norm-100 mg/dL)</label><input type="number" name="LDL" class="w-full border rounded p-2"></div>
+            <div><label>HDL (>40 mg/dL)</label><input type="number" name="HDL" class="w-full border rounded p-2"></div>
+            <div><label>ALT (7-56 U/L)</label><input type="number" name="ALT" class="w-full border rounded p-2"></div>
+            <div><label>AST (10-40 U/L)</label><input type="number" name="AST" class="w-full border rounded p-2"></div>
+            <div><label>Heart Rate (60-100 bpm)</label><input type="number" name="pulse" class="w-full border rounded p-2"></div>
+            <div><label>Creatinine (0.6-1.3 mg/dL)</label><input type="number" name="Creatinine" class="w-full border rounded p-2"></div>
+            <div><label>Troponin (norm-0.04 ng/mL)</label><input type="number" name="Troponin" class="w-full border rounded p-2"></div>
+            <div><label>C-reactive Protein (norm-3 mg/L)</label><input type="number" name="C-reactive Protein" class="w-full border rounded p-2"></div>
+
+            <div class="col-span-2 md:col-span-3 text-center mt-6">
+              <button type="submit" id="predictBtn" class="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-semibold shadow-lg">
+                Predict Disease
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Prediction Result Display -->
+        <div id="predictionResult" class="hidden mt-8">
+          <div class="bg-gradient-to-br from-green-50 to-blue-50 border-2 border-green-300 p-8 rounded-2xl shadow-2xl">
+            <h3 class="text-2xl font-bold text-green-800 mb-4 flex items-center gap-3">
+              <span class="text-3xl">✅</span>
+              Prediction Result
+            </h3>
+            <div id="resultText" class="text-gray-700 text-lg mb-6"></div>
+            <button id="downloadReportBtn" onclick="downloadPDF()" 
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all">
+              📄 Download PDF Report
+            </button>
+          </div>
+        </div>
+      </section>
+
+ <!-- ==================== REPORTS SECTION (MODIFIED WITH BAR CHART) ==================== -->
+      <section id="reports" class="fade-section hidden">
+        <div class="mb-8">
+          <h2 class="text-4xl font-bold text-blue-900 mb-2">Health Reports</h2>
+          <p class="text-gray-600 text-lg">Visualize your health statistics</p>
+        </div>
+        
+        <!-- NEW: Bar Chart for Statistics -->
+        <div class="bg-white shadow-xl rounded-2xl p-8">
+          <h3 class="text-xl font-bold text-blue-900 mb-6 text-center">Health Statistics Overview</h3>
+          <div class="max-w-3xl mx-auto">
+            <canvas id="reportBarChart" style="height: 400px;"></canvas>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- Previous Results Section -->
+      <section id="previous" class="fade-section hidden">
+        <h2 class="text-2xl font-bold text-[#0a4b78] mb-6">Previous Results</h2>
+        <table class="min-w-full bg-white border border-gray-300 rounded-xl overflow-hidden shadow-md">
+          <thead class="bg-[#0a4b78] text-white">
+            <tr>
+              <th class="py-2 px-4">Date</th>
+              <th class="py-2 px-4">Time</th>
+              <th class="py-2 px-4">Disease</th>
+              <th class="py-2 px-4">Confidence</th>
+              <th class="py-2 px-4">Download</th>
+            </tr>
+          </thead>
+          <tbody id="resultTable" class="text-center text-gray-700">
+            <tr><td colspan="5" class="py-3">No records yet.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- ==================== ACCOUNT SETTINGS (COMPLETELY REDESIGNED) ==================== -->
+      <section id="account" class="fade-section hidden">
+        <h2 class="text-4xl font-bold text-blue-900 mb-8">My Profile</h2>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <!-- Left Column: Profile Picture -->
+          <div class="bg-white shadow-xl rounded-2xl p-8 flex flex-col items-center">
+            <h3 class="text-xl font-bold text-gray-800 mb-6">Profile Picture</h3>
+            
+            <div class="relative profile-pic-upload mb-6">
+              <img id="profilePicDisplay" src="https://ui-avatars.com/api/?name=User&background=3b82f6&color=fff&size=200" 
+                   alt="Profile" class="w-40 h-40 rounded-full border-4 border-blue-500 shadow-lg" />
+              <div class="upload-overlay">
+                <span class="text-white font-bold">Change</span>
+              </div>
+              <input type="file" id="profilePicInput" accept="image/*" class="hidden" onchange="uploadProfilePic()" />
+            </div>
+            
+            <button onclick="document.getElementById('profilePicInput').click()" 
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold shadow-lg">
+              📷 Upload New Photo
+            </button>
+            <p class="text-xs text-gray-500 mt-2">Max 5MB (JPG, PNG, GIF)</p>
+          </div>
+
+          <!-- Right Column: Profile Information -->
+          <div class="lg:col-span-2 space-y-6">
+            
+            <!-- Name Section -->
+            <div class="bg-white shadow-xl rounded-2xl p-6">
+              <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <span>✏️</span> Edit Name
+              </h3>
+              <div class="flex gap-4">
+                <input type="text" id="editName" placeholder="Enter new name" 
+                       class="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                <button onclick="updateName()" 
+                        class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold">
+                  Save
+                </button>
+              </div>
+            </div>
+
+            <!-- Mobile Number Section -->
+            <div class="bg-white shadow-xl rounded-2xl p-6">
+              <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <span>📱</span> Edit Mobile Number
+              </h3>
+              <div class="space-y-3">
+                <div class="flex gap-4">
+                  <input type="tel" id="editMobile" placeholder="Enter new mobile number" 
+                         class="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                  <button onclick="sendMobileOTP()" 
+                          class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold whitespace-nowrap">
+                    Send OTP
+                  </button>
+                </div>
+                <div id="mobileOTPSection" class="hidden flex gap-4">
+                  <input type="number" id="mobileOTP" placeholder="Enter OTP" maxlength="4"
+                         class="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent" />
+                  <button onclick="verifyMobileOTP()" 
+                          class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold">
+                    Verify & Save
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Email Section -->
+            <div class="bg-white shadow-xl rounded-2xl p-6">
+              <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <span>📧</span> Edit Email
+              </h3>
+              <div class="space-y-3">
+                <div class="flex gap-4">
+                  <input type="email" id="editEmail" placeholder="Enter new email" 
+                         class="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                  <button onclick="sendEmailOTP()" 
+                          class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold whitespace-nowrap">
+                    Send OTP
+                  </button>
+                </div>
+                <div id="emailOTPSection" class="hidden flex gap-4">
+                  <input type="text" id="emailOTP" placeholder="Enter OTP" maxlength="4"
+                         class="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent" />
+                  <button onclick="verifyEmailOTP()" 
+                          class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold">
+                    Verify & Save
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Password Section -->
+            <div class="bg-white shadow-xl rounded-2xl p-6">
+              <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <span>🔒</span> Change Password
+              </h3>
+              <div class="space-y-3">
+                <input type="password" id="currentPassword" placeholder="Current Password" 
+                       class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                <input type="password" id="newPassword" placeholder="New Password" 
+                       class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                <input type="password" id="confirmPassword" placeholder="Confirm New Password" 
+                       class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                <button onclick="changePassword()" 
+                        class="w-full bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold">
+                  Change Password
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ========== SUPPORT / MESSAGE ADMIN ========== -->
+      <section id="support" class="fade-section hidden">
+        <h2 class="text-3xl font-bold text-blue-900 mb-4">Message Admin / Support</h2>
+        <p class="text-gray-600 mb-6">Select an admin and send your question or feedback. Admin replies will appear here.</p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Left: Compose -->
+          <div class="bg-white rounded-2xl shadow-xl p-6">
+            <h3 class="font-semibold text-lg mb-4">Send Message</h3>
+
+            <label class="text-sm text-gray-700">To</label>
+            <select id="adminSelect" class="w-full border rounded p-2 mb-3">
+              <option value="1">MATAM SANGAMESWARA SWAMY — System Admin</option>
+              <option value="2">H MALLIKARJUNA — Support Lead</option>
+              <option value="3">HEMANTH NAIK K B — Hardware Lead</option>
+              <option value="4">SANTHOSH K — Clinical Advisor</option>
+            </select>
+
+            <label class="text-sm text-gray-700">Subject</label>
+            <input id="msgSubject" type="text" maxlength="100"
+                  class="w-full border rounded p-2 mb-3" placeholder="Short subject (e.g., Sensor not connecting)">
+
+            <label class="text-sm text-gray-700">Message</label>
+            <textarea id="msgBody" rows="6" maxlength="1000" class="w-full border rounded p-2 mb-3"
+                      placeholder="Describe your issue or question..."></textarea>
+
+            <div class="flex items-center gap-3">
+              <button onclick="sendAdminMessage()" id="sendMsgBtn"
+                      class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-semibold shadow">
+                Send Message
+              </button>
+              <button onclick="clearMessageForm()" class="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg">
+                Clear
+              </button>
+            </div>
+          </div>
+
+          <!-- Right: Message history -->
+          <div class="lg:col-span-2 bg-white rounded-2xl shadow-xl p-6">
+            <h3 class="font-semibold text-lg mb-4">Your Messages & Replies</h3>
+
+            <div id="messagesContainer" class="space-y-4 max-h-[60vh] overflow-y-auto p-2">
+              <!-- messages will be injected here by JS -->
+              <div class="text-sm text-gray-500">Loading messages...</div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- ========== END SUPPORT ========== -->
+
+
+
+      <!-- Download Center -->
+      <section id="downloads" class="fade-section hidden">
+        <h2 class="text-2xl font-bold text-[#0a4b78] mb-6">Download Center</h2>
+        <div id="downloadList" class="space-y-4">
+          <p class="text-gray-700">All your past reports will be available here for download.</p>
+        </div>
+      </section>
+
+      <!-- 💡 AI Insights -->
+      <section id="ai" class="fade-section hidden">
+        <h2 class="text-4xl font-bold text-blue-900 mb-6">🤖 AI Health Insights & Recommendations</h2>
+        
+        <!-- Main Suggest Button -->
+        <div class="mb-8">
+          <button onclick="openAISuggestModal()" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-4 px-10 rounded-xl shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all flex items-center gap-3 text-lg">
+            <span class="text-2xl">💡</span>
+            <span>Get AI Suggestions & Precautions</span>
+          </button>
+        </div>
+
+        <!-- Health Score Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div class="bg-white shadow-xl rounded-2xl p-6 text-center border-t-4 border-blue-500">
+            <h3 class="text-lg font-semibold text-gray-700 mb-3">Health Score</h3>
+            <p class="text-5xl font-bold text-blue-600" id="healthScore">-</p>
+            <p class="text-sm text-gray-500 mt-3">Out of 100</p>
+          </div>
+          
+          <div class="bg-white shadow-xl rounded-2xl p-6 text-center border-t-4 border-yellow-500">
+            <h3 class="text-lg font-semibold text-gray-700 mb-3">Risk Level</h3>
+            <p class="text-3xl font-bold text-yellow-600" id="riskLevel">-</p>
+            <p class="text-sm text-gray-500 mt-3">Assessment Status</p>
+          </div>
+          
+          <div class="bg-white shadow-xl rounded-2xl p-6 text-center border-t-4 border-green-500">
+            <h3 class="text-lg font-semibold text-gray-700 mb-3">Next Check-up</h3>
+            <p class="text-2xl font-bold text-green-600" id="nextCheck">-</p>
+            <p class="text-sm text-gray-500 mt-3">Recommended</p>
+          </div>
+        </div>
+
+        <!-- Recent Insights Display -->
+        <div class="bg-gradient-to-br from-blue-50 to-white border-2 border-blue-200 rounded-2xl p-8 shadow-lg">
+          <h3 class="text-2xl font-bold text-blue-900 mb-6">📊 Your Health Summary</h3>
+          <div id="aiInsightsList" class="space-y-4">
+            <p class="text-gray-600 text-center py-8">Click "Get AI Suggestions & Precautions" to receive personalized recommendations based on your latest prediction.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 🔍 AI Insights Modal -->
+      <div id="aiSuggestModal" class="modal hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+          <!-- Modal Header -->
+          <div class="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6 flex justify-between items-center sticky top-0">
+            <h2 class="text-2xl font-bold flex items-center gap-3">
+              <span class="text-3xl">🤖</span>
+              AI Health Suggestions & Precautions
+            </h2>
+            <button onclick="closeAISuggestModal()" class="text-white hover:bg-blue-800 p-2 rounded-lg transition-colors text-2xl">✕</button>
+          </div>
+
+          <!-- Modal Content -->
+          <div class="p-8 space-y-6">
+            <!-- Loading State -->
+            <div id="aiLoadingState" class="text-center space-y-4">
+              <div class="flex justify-center">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+              </div>
+              <p class="text-gray-700 font-semibold">⏳ Analyzing your health data with AI...</p>
+            </div>
+
+            <!-- Content Container (hidden by default) -->
+            <div id="aiInsightsContent" class="hidden space-y-6">
+              <!-- Disease Detection -->
+              <div class="bg-blue-50 border-l-4 border-blue-600 rounded-lg p-6">
+                <h3 class="text-xl font-bold text-blue-900 mb-3 flex items-center gap-2">
+                  <span class="text-2xl">🔍</span>
+                  Detected Conditions
+                </h3>
+                <div id="detectedDiseases" class="space-y-3"></div>
+              </div>
+
+              <!-- Feedback -->
+              <div class="bg-white border-2 border-blue-200 rounded-lg p-6">
+                <h3 class="text-xl font-bold text-blue-900 mb-4 flex items-center gap-2">
+                  <span class="text-2xl">💬</span>
+                  AI Feedback & Analysis
+                </h3>
+                <div id="aiFeedback" class="text-gray-700 leading-relaxed space-y-3"></div>
+              </div>
+
+              <!-- Precautions -->
+              <div class="bg-green-50 border-l-4 border-green-600 rounded-lg p-6">
+                <h3 class="text-xl font-bold text-green-900 mb-4 flex items-center gap-2">
+                  <span class="text-2xl">⚠️</span>
+                  Recommended Precautions & Actions
+                </h3>
+                <ul id="precautionsList" class="space-y-2 text-gray-700"></ul>
+              </div>
+
+              <!-- Lifestyle Recommendations -->
+              <div class="bg-blue-50 border-l-4 border-blue-600 rounded-lg p-6">
+                <h3 class="text-xl font-bold text-blue-900 mb-4 flex items-center gap-2">
+                  <span class="text-2xl">🏃</span>
+                  Lifestyle Recommendations
+                </h3>
+                <ul id="lifestyleList" class="space-y-2 text-gray-700"></ul>
+              </div>
+
+              <!-- Follow-up Actions -->
+              <div class="bg-yellow-50 border-l-4 border-yellow-600 rounded-lg p-6">
+                <h3 class="text-xl font-bold text-yellow-900 mb-4 flex items-center gap-2">
+                  <span class="text-2xl">📋</span>
+                  Next Steps & Follow-up
+                </h3>
+                <div id="followUpText" class="text-gray-700 leading-relaxed"></div>
+              </div>
+
+              <!-- Timestamp -->
+              <p class="text-sm text-gray-500 text-center pt-4 border-t">
+                Last analysis: <span id="analysisTime">-</span>
+              </p>
+            </div>
+
+            <!-- Error State -->
+            <div id="aiErrorState" class="hidden text-center">
+              <div class="text-4xl mb-4">⚠️</div>
+              <p class="text-gray-700 font-semibold mb-4" id="errorMessage">Unable to generate insights</p>
+              <button onclick="openAISuggestModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold">
+                Try Again
+              </button>
+            </div>
+          </div>
+
+          <!-- Modal Footer -->
+          <div class="bg-gray-50 p-6 border-t border-gray-200 flex justify-end gap-4">
+            <button onclick="closeAISuggestModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-2 rounded-lg font-semibold transition-colors">
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script>
+    // Chart instances
+    let pieChart1 = null;
+    let pieChart2 = null;
+    let pieChart3 = null;
+    let reportBarChart = null;
+    let currentPdfUrl = null;
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      const username = "{{ user_name }}";
+      document.getElementById('username').textContent = username;
+      
+       // Load user profile data
+      loadUserProfile();
+
+      // Load initial data
+       loadStats().then(() => {
+        loadPieCharts();
+      });
+      loadHistory();
+      // ADD THIS LINE
+
+      // ADD THESE NEW INITIALIZATIONS:
+      initMobileMenu();
+      initSidebarAnimations();
+    });
+
+
+    // ADD THESE NEW FUNCTIONS:
+
+    // Mobile menu toggle
+    function initMobileMenu() {
+      const mobileBtn = document.getElementById('mobileMenuBtn');
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebarOverlay');
+      
+      if (!mobileBtn || !sidebar || !overlay) return;
+      
+      // Toggle sidebar on button click
+      mobileBtn.addEventListener('click', function() {
+        sidebar.classList.toggle('-translate-x-full');
+        overlay.classList.toggle('hidden');
+        
+        // Change button icon
+        const icon = this.querySelector('svg');
+        if (sidebar.classList.contains('-translate-x-full')) {
+          icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>';
+        } else {
+          icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>';
+        }
+      });
+      
+      // Close sidebar when clicking overlay
+      overlay.addEventListener('click', function() {
+        sidebar.classList.add('-translate-x-full');
+        overlay.classList.add('hidden');
+        mobileBtn.querySelector('svg').innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>';
+      });
+      
+      // Close sidebar on mobile when menu item is clicked
+      document.querySelectorAll('.menu-item').forEach(item => {
+        item.addEventListener('click', function() {
+          if (window.innerWidth < 1024) {
+            sidebar.classList.add('-translate-x-full');
+            overlay.classList.add('hidden');
+            mobileBtn.querySelector('svg').innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>';
+          }
+        });
+      });
+    }
+
+    // Sidebar animations
+    function initSidebarAnimations() {
+      const menuItems = document.querySelectorAll('.menu-item');
+      
+      menuItems.forEach(item => {
+        item.addEventListener('mouseenter', function() {
+          this.style.transform = 'translateX(8px) scale(1.02)';
+        });
+        
+        item.addEventListener('mouseleave', function() {
+          if (!this.classList.contains('menu-item-active')) {
+            this.style.transform = 'translateX(0) scale(1)';
+          }
+        });
+      });
+    }
+
+    // Animate menu item on click (fluctuating effect)
+    function animateMenuItem(element) {
+      // Remove active class from all items
+      document.querySelectorAll('.menu-item').forEach(item => {
+        item.classList.remove('menu-item-active');
+        item.style.transform = '';
+      });
+      
+      // Add pulse animation
+      element.classList.add('menu-pulse');
+      
+      // After animation, add active state
+      setTimeout(() => {
+        element.classList.remove('menu-pulse');
+        element.classList.add('menu-item-active');
+      }, 600);
+      
+      // Vibration effect on mobile (if supported)
+      if (navigator.vibrate) {
+        navigator.vibrate(50);
+      }
+    }
+
+
+
+        // ==================== PROFILE MANAGEMENT FUNCTIONS (NEW) ====================
+    
+    async function loadUserProfile() {
+      try {
+        const response = await fetch('/get_user_profile');
+        const data = await response.json();
+        
+        if (data.error) {
+          console.error('Profile load error:', data.error);
+          return;
+        }
+        
+        // Update profile picture in navbar
+        const profilePicUrl = data.profile_pic !== 'default.png' 
+          ? `/static/profile_pics/${data.profile_pic}`
+          : `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name)}&background=3b82f6&color=fff&size=128`;
+        
+        // Update BOTH profile pictures
+        const navbarPic = document.getElementById('userProfilePic');
+        const accountPic = document.getElementById('profilePicDisplay');
+        
+        if (navbarPic) {
+          navbarPic.src = profilePicUrl;
+        }
+        if (accountPic) {
+          accountPic.src = profilePicUrl.replace('size=128', 'size=200');
+        }
+        
+        // Update form fields
+        document.getElementById('editName').value = data.name;
+        document.getElementById('editMobile').value = data.mobile;
+        document.getElementById('editEmail').value = data.gmail;
+        
+      } catch (error) {
+        console.error('Profile load error:', error);
+      }
+    }
+
+    async function uploadProfilePic() {
+      const fileInput = document.getElementById('profilePicInput');
+      const file = fileInput.files[0];
+      
+      if (!file) return;
+      
+      // Validate file size (5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('❌ File size must be less than 5MB');
+        return;
+      }
+      
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+      if (!allowedTypes.includes(file.type)) {
+        alert('❌ Only JPG, PNG, and GIF files are allowed');
+        return;
+      }
+      
+      const formData = new FormData();
+      formData.append('profile_pic', file);
+      
+      try {
+        const response = await fetch('/upload_profile_pic', {
+          method: 'POST',
+          body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          // Update profile pictures
+          document.getElementById('userProfilePic').src = data.url;
+          document.getElementById('profilePicDisplay').src = data.url;
+          alert('✅ Profile picture updated successfully!');
+        } else {
+          alert('❌ ' + data.error);
+        }
+      } catch (error) {
+        console.error('Upload error:', error);
+        alert('❌ Failed to upload profile picture');
+      }
+    }
+
+    async function updateName() {
+      const newName = document.getElementById('editName').value.trim();
+      
+      if (!newName || newName.length < 2) {
+        alert('❌ Please enter a valid name (at least 2 characters)');
+        return;
+      }
+      
+      try {
+        const response = await fetch('/update_name', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: newName })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          document.getElementById('username').textContent = newName;
+          alert('✅ Name updated successfully!');
+          loadUserProfile();
+        } else {
+          alert('❌ ' + data.error);
+        }
+      } catch (error) {
+        console.error('Update name error:', error);
+        alert('❌ Failed to update name');
+      }
+    }
+
+    async function sendMobileOTP() {
+      const newMobile = document.getElementById('editMobile').value.trim();
+      
+      if (!newMobile || newMobile.length < 10) {
+        alert('❌ Please enter a valid mobile number');
+        return;
+      }
+      
+      try {
+        const response = await fetch('/send_update_mobile_otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ mobile: newMobile })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          document.getElementById('mobileOTPSection').classList.remove('hidden');
+          alert('✅ OTP sent to your new mobile number (check terminal/console)');
+        } else {
+          alert('❌ ' + data.error);
+        }
+      } catch (error) {
+        console.error('Send OTP error:', error);
+        alert('❌ Failed to send OTP');
+      }
+    }
+
+    async function verifyMobileOTP() {
+      const otp = document.getElementById('mobileOTP').value.trim();
+      
+      if (!otp || otp.length !== 4) {
+        alert('❌ Please enter 4-digit OTP');
+        return;
+      }
+      
+      try {
+        const response = await fetch('/verify_update_mobile_otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ otp: otp })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          alert('✅ Mobile number updated successfully!');
+          document.getElementById('mobileOTPSection').classList.add('hidden');
+          document.getElementById('mobileOTP').value = '';
+          loadUserProfile();
+        } else {
+          alert('❌ ' + data.error);
+        }
+      } catch (error) {
+        console.error('Verify OTP error:', error);
+        alert('❌ Failed to verify OTP');
+      }
+    }
+
+    async function sendEmailOTP() {
+      const newEmail = document.getElementById('editEmail').value.trim();
+      
+      if (!newEmail || !newEmail.includes('@')) {
+        alert('❌ Please enter a valid email address');
+        return;
+      }
+      
+      try {
+        const response = await fetch('/send_update_email_otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: newEmail })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          document.getElementById('emailOTPSection').classList.remove('hidden');
+          alert('✅ OTP sent to your new email (check terminal/console)');
+        } else {
+          alert('❌ ' + data.error);
+        }
+      } catch (error) {
+        console.error('Send OTP error:', error);
+        alert('❌ Failed to send OTP');
+      }
+    }
+
+    async function verifyEmailOTP() {
+      const otp = document.getElementById('emailOTP').value.trim();
+      
+      if (!otp || otp.length !== 4) {
+        alert('❌ Please enter 4-digit OTP');
+        return;
+      }
+      
+      try {
+        const response = await fetch('/verify_update_email_otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ otp: otp })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          alert('✅ Email updated successfully!');
+          document.getElementById('emailOTPSection').classList.add('hidden');
+          document.getElementById('emailOTP').value = '';
+          loadUserProfile();
+        } else {
+          alert('❌ ' + data.error);
+        }
+      } catch (error) {
+        console.error('Verify OTP error:', error);
+        alert('❌ Failed to verify OTP');
+      }
+    }
+
+    async function changePassword() {
+      const currentPassword = document.getElementById('currentPassword').value;
+      const newPassword = document.getElementById('newPassword').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      
+      if (!currentPassword || !newPassword || !confirmPassword) {
+        alert('❌ All password fields are required');
+        return;
+      }
+      
+      if (newPassword !== confirmPassword) {
+        alert('❌ New passwords do not match');
+        return;
+      }
+      
+      if (newPassword.length < 6) {
+        alert('❌ New password must be at least 6 characters');
+        return;
+      }
+      
+      try {
+        const response = await fetch('/change_password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            current_password: currentPassword,
+            new_password: newPassword,
+            confirm_password: confirmPassword
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          alert('✅ Password changed successfully!');
+          document.getElementById('currentPassword').value = '';
+          document.getElementById('newPassword').value = '';
+          document.getElementById('confirmPassword').value = '';
+        } else {
+          alert('❌ ' + data.error);
+        }
+      } catch (error) {
+        console.error('Change password error:', error);
+        alert('❌ Failed to change password');
+      }
+    }
+
+    // ==================== CHART FUNCTIONS (MODIFIED) ====================
+
+    async function loadPieCharts() {
+      try {
+        const response = await fetch('/get_stats');
+        const data = await response.json();
+        
+        const total = data.total_predictions || 0;
+        const diseases = data.detected_diseases || 0;
+        const normal = data.normal_reports || 0;
+        
+        // Pie Chart 1: Total Predictions Breakdown
+        const ctx1 = document.getElementById('pieChart1').getContext('2d');
+        if (pieChart1) pieChart1.destroy();
+        
+        pieChart1 = new Chart(ctx1, {
+          type: 'pie',
+          data: {
+            labels: ['Detected Diseases', 'Normal Reports'],
+            datasets: [{
+              data: [diseases, normal],
+              backgroundColor: ['#ef4444', '#10b981'],
+              borderWidth: 2,
+              borderColor: '#fff'
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { position: 'bottom' },
+              title: { display: true, text: `Total: ${total}` }
+            }
+          }
+        });
+        
+        // Pie Chart 2: Disease vs Normal
+        const ctx2 = document.getElementById('pieChart2').getContext('2d');
+        if (pieChart2) pieChart2.destroy();
+        
+        const diseasePercent = total > 0 ? ((diseases / total) * 100).toFixed(1) : 0;
+        const normalPercent = total > 0 ? ((normal / total) * 100).toFixed(1) : 0;
+        
+        pieChart2 = new Chart(ctx2, {
+          type: 'doughnut',
+          data: {
+            labels: [`Diseases (${diseasePercent}%)`, `Normal (${normalPercent}%)`],
+            datasets: [{
+              data: [diseases, normal],
+              backgroundColor: ['#f59e0b', '#3b82f6'],
+              borderWidth: 2,
+              borderColor: '#fff'
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { position: 'bottom' }
+            }
+          }
+        });
+        
+        // Pie Chart 3: Status Overview
+        const ctx3 = document.getElementById('pieChart3').getContext('2d');
+        if (pieChart3) pieChart3.destroy();
+        
+        pieChart3 = new Chart(ctx3, {
+          type: 'pie',
+          data: {
+            labels: ['Abnormal', 'Healthy'],
+            datasets: [{
+              data: [diseases, normal],
+              backgroundColor: ['#ef4444', '#10b981'],
+              borderWidth: 2,
+              borderColor: '#fff'
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { position: 'bottom' }
+            }
+          }
+        });
+        
+      } catch (error) {
+        console.error('Pie charts load error:', error);
+      }
+    }
+
+    async function loadBarChart() {
+    try {
+      console.log('🔄 Loading bar chart...');
+      const response = await fetch('/get_stats');
+      const data = await response.json();
+      console.log('📊 Stats data received:', data);
+      
+      const canvas = document.getElementById('reportBarChart');
+      if (!canvas) {
+        console.error('❌ Bar chart canvas not found!');
+        return;
+      }
+      
+      console.log('✅ Canvas found, creating chart...');
+      
+      // Destroy existing chart PROPERLY
+      if (reportBarChart) {
+        reportBarChart.destroy();
+        reportBarChart = null;
+      }
+
+      const ctx = canvas.getContext('2d');
+      reportBarChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Total Predictions', 'Detected Diseases', 'Normal Reports'],
+          datasets: [{
+            label: 'Count',
+            data: [
+              data.total_predictions || 0,
+              data.detected_diseases || 0,
+              data.normal_reports || 0
+            ],
+            backgroundColor: ['#3b82f6', '#ef4444', '#10b981'],
+            borderColor: ['#2563eb', '#dc2626', '#059669'],
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: { stepSize: 1 }
+            }
+          },
+          plugins: {
+            legend: { display: false },
+            title: {
+              display: true,
+              text: 'Your Health Statistics',
+              font: { size: 16 }
+            }
+          }
+        }
+      });
+      
+      console.log('✅ Bar chart created successfully!');
+      
+    } catch (error) {
+      console.error('❌ Bar chart load error:', error);
+    }
+  }
+
+    async function loadChartData() {
+      await loadStats();
+      await loadPieCharts();
+      await loadBarChart();
+    }
+
+
+
+    // Section navigation
+    function openSection(id) {
+      console.log('🔀 Opening section:', id);
+      
+      document.querySelectorAll('.fade-section').forEach(sec => {
+        sec.classList.add('hidden');
+        sec.classList.remove('active');
+      });
+      
+      const section = document.getElementById(id);
+      section.classList.remove('hidden');
+      setTimeout(() => section.classList.add('active'), 50);
+
+      // Load data when opening specific sections
+      if (id === 'home') {
+        loadStats();
+        loadPieCharts();
+      }
+      if (id === 'previous') loadHistory();
+      if (id === 'reports') {
+        console.log('📊 Reports section opened, loading chart...');
+        loadStats();
+        setTimeout(() => {
+          loadBarChart();
+        }, 300);
+      }
+      if (id === 'downloads') loadDownloads();
+      if (id === 'account') loadUserProfile();
+      if (id === 'ai') loadAIInsights();
+    }
+
+    // Toggle manual input form
+    function manualInput() {
+      const form = document.getElementById("manualInputForm");
+      form.classList.toggle("hidden");
+    }
+
+    async function sensorInput() {
+        try {
+            const response = await fetch('/get_latest_sensor');
+            const result = await response.json();
+
+            if (result.status !== 'ok') {
+                alert('❌ No sensor data available');
+                return;
+            }
+
+            const form = document.getElementById('bloodForm');
+            const sensorData = result.data;
+
+            let filledCount = 0;
+
+            for (const [key, value] of Object.entries(sensorData)) {
+                const input = form.querySelector(`input[name="${key}"]`);
+                if (input) {
+                    input.value = value;
+                    input.style.backgroundColor = '#d1fae5';
+                    filledCount++;
+                }
+            }
+
+            document.getElementById("manualInputForm").classList.remove("hidden");
+
+            alert(`✅ Sensor data loaded!\n${filledCount} parameters received.`);
+        } catch (error) {
+            console.error(error);
+            alert('❌ Failed to fetch sensor data.');
+        }
+    }
+
+
+    // Load statistics
+    async function loadStats() {
+      try {
+        const response = await fetch('/get_stats');
+        const data = await response.json();
+        
+        document.getElementById('total-pred').textContent = data.total_predictions;
+        document.getElementById('disease-count').textContent = data.detected_diseases;
+        document.getElementById('normal-count').textContent = data.normal_reports;
+      } catch (error) {
+        console.error('Stats load error:', error);
+      }
+    }
+
+    // Load history table
+    async function loadHistory() {
+      try {
+        const response = await fetch('/get_history');
+        const data = await response.json();
+        
+        const tableBody = document.getElementById('resultTable');
+        
+        if (data.history.length === 0) {
+          tableBody.innerHTML = '<tr><td colspan="5" class="py-3">No records yet.</td></tr>';
+          return;
+        }
+        
+        tableBody.innerHTML = data.history.map(item => `
+          <tr class="hover:bg-gray-50">
+            <td class="py-2 px-4">${item.date}</td>
+            <td class="py-2 px-4">${item.time}</td>
+            <td class="py-2 px-4">${item.disease}</td>
+            <td class="py-2 px-4">${item.confidence}%</td>
+            <td class="py-2 px-4">
+              <a href="${item.download_url}" target="_blank" class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">
+                Download
+              </a>
+            </td>
+          </tr>
+        `).join('');
+      } catch (error) {
+        console.error('History load error:', error);
+      }
+    }
+
+    // Load downloads
+    async function loadDownloads() {
+      try {
+        const response = await fetch('/get_history');
+        const data = await response.json();
+        
+        const downloadList = document.getElementById('downloadList');
+        
+        if (data.history.length === 0) {
+          downloadList.innerHTML = '<p class="text-gray-700">No reports available yet.</p>';
+          return;
+        }
+        
+        downloadList.innerHTML = data.history.map(item => `
+          <div class="bg-white shadow-md rounded-lg p-4 flex justify-between items-center">
+            <div>
+              <h3 class="font-semibold text-gray-800">${item.disease} Report</h3>
+              <p class="text-sm text-gray-600">${item.date} at ${item.time}</p>
+            </div>
+            <a href="${item.download_url}" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
+              Download PDF
+            </a>
+          </div>
+        `).join('');
+      } catch (error) {
+        console.error('Downloads load error:', error);
+      }
+    }
+
+    // Form submission
+    document.getElementById('bloodForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const btn = document.getElementById('predictBtn');
+      btn.disabled = true;
+      btn.innerHTML = '⏳ Predicting...';
+      
+      // Collect form data
+      const formData = new FormData(e.target);
+      const payload = {};
+      for (const [key, value] of formData.entries()) {
+        payload[key] = value !== '' ? Number(value) : null;
+      }
+      
+      try {
+        const response = await fetch('/predict', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        
+        if (!response.ok) {
+          throw new Error('Prediction failed');
+        }
+        
+        const data = await response.json();
+        
+        // Display results
+        displayResults(data);
+        
+        // Update dashboard instantly
+        loadStats();
+        loadHistory();
+        loadChartData();
+        
+      } catch (error) {
+        console.error('Prediction error:', error);
+        alert('❌ Prediction failed. Please try again.');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'Predict Disease';
+      }
+    });
+
+
+    // sensor input    
+    async function sensorInput() {
+    try {
+        // Show loading
+        const loadingMsg = document.createElement('div');
+        loadingMsg.id = 'sensorLoading';
+        loadingMsg.className = 'mt-4 p-4 bg-blue-100 rounded-lg';
+        loadingMsg.innerHTML = '⏳ Fetching sensor data...';
+        document.getElementById('disease').appendChild(loadingMsg);
+        
+        const response = await fetch('/get_latest_sensor');
+        const result = await response.json();
+        
+        // Remove loading message
+        document.getElementById('sensorLoading')?.remove();
+        
+        if (result.status === 'ok') {
+            const form = document.getElementById('bloodForm');
+            const sensorData = result.data;
+            
+            // Track which fields were auto-filled
+            let filledCount = 0;
+            let missingParams = [];
+            
+            // Auto-fill form with sensor data
+            for (const [key, value] of Object.entries(sensorData)) {
+                const input = form.querySelector(`input[name="${key}"]`);
+                if (input) {
+                    input.value = value;
+                    input.style.backgroundColor = '#d1fae5'; // Green highlight
+                    filledCount++;
+                } else {
+                    console.warn(`Parameter ${key} not found in form`);
+                }
+            }
+            
+            // Find missing parameters
+            form.querySelectorAll('input[type="number"]').forEach(input => {
+                if (!input.value) {
+                    missingParams.push(input.name);
+                }
+            });
+            
+            // Show form
+            document.getElementById("manualInputForm").classList.remove("hidden");
+            
+            // Show info message
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'mt-4 p-4 bg-green-100 border-l-4 border-green-500 rounded';
+            infoDiv.innerHTML = `
+                <p class="font-bold text-green-800">✅ Sensor Data Loaded!</p>
+                <p class="text-sm text-green-700">
+                    • Received: ${filledCount} parameters from device "${result.device_id}"
+                    <br>• Timestamp: ${new Date(result.timestamp).toLocaleString()}
+                    <br>• Missing: ${missingParams.length} parameters (will be auto-filled by ML model)
+                </p>
+                ${missingParams.length > 0 ? `
+                    <details class="mt-2">
+                        <summary class="cursor-pointer text-sm font-semibold">View missing parameters</summary>
+                        <p class="text-xs mt-1">${missingParams.join(', ')}</p>
+                    </details>
+                ` : ''}
+            `;
+            document.getElementById('manualInputForm').insertAdjacentElement('afterend', infoDiv);
+            
+            alert(`✅ Sensor data loaded!\n${filledCount} parameters received.\n\nYou can:\n1. Review auto-filled values (green)\n2. Fill missing fields manually (optional)\n3. Click "Predict Disease"`);
+            
+        } else {
+            alert('❌ No sensor data available.\n\nPlease ensure:\n1. ESP8266 is connected\n2. app1.py is running on port 5001\n3. Sensor has sent recent data');
+        }
+    } catch (error) {
+        document.getElementById('sensorLoading')?.remove();
+        console.error('Sensor fetch error:', error);
+        alert('❌ Failed to fetch sensor data.\n\nCheck console for details.');
+    }
+  }
+
+
+
+
+    // Modal functions for AI Insights
+    function openAISuggestModal() {
+      const modal = document.getElementById('aiSuggestModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      
+      // Start fetching AI insights
+      generateAISuggestions();
+    }
+
+    function closeAISuggestModal() {
+      const modal = document.getElementById('aiSuggestModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    async function generateAISuggestions() {
+      try {
+        // Reset states
+        document.getElementById('aiLoadingState').classList.remove('hidden');
+        document.getElementById('aiInsightsContent').classList.add('hidden');
+        document.getElementById('aiErrorState').classList.add('hidden');
+
+        // Fetch AI insights from backend
+        const response = await fetch('/generate_ai_suggestions');
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
+        // Display the insights
+        displayAISuggestions(data);
+
+        // Update stats on the main page
+        updateHealthStats();
+
+      } catch (error) {
+        console.error('AI Suggestions error:', error);
+        document.getElementById('aiLoadingState').classList.add('hidden');
+        document.getElementById('aiErrorState').classList.remove('hidden');
+        document.getElementById('errorMessage').textContent = error.message || 'Unable to generate suggestions. Please try again.';
+      }
+    }
+
+    function displayAISuggestions(data) {
+      // Hide loading, show content
+      document.getElementById('aiLoadingState').classList.add('hidden');
+      document.getElementById('aiInsightsContent').classList.remove('hidden');
+
+      // Display detected diseases
+      const diseasesContainer = document.getElementById('detectedDiseases');
+      if (data.diseases && data.diseases.length > 0) {
+        diseasesContainer.innerHTML = data.diseases.map(disease => `
+          <div class="bg-white rounded p-4 border-l-4 border-red-500">
+            <p class="font-semibold text-red-700">${disease}</p>
+          </div>
+        `).join('');
+      }
+
+      // Display feedback
+      const feedbackContainer = document.getElementById('aiFeedback');
+      if (data.feedback) {
+        feedbackContainer.innerHTML = data.feedback.split('\n').map(line => {
+          if (line.trim()) {
+            return `<p>${line}</p>`;
+          }
+        }).join('');
+      }
+
+      // Display precautions
+      const precautionsContainer = document.getElementById('precautionsList');
+      if (data.precautions && data.precautions.length > 0) {
+        precautionsContainer.innerHTML = data.precautions.map(precaution => `
+          <li class="flex items-start gap-3">
+            <span class="text-green-600 font-bold mt-1">✓</span>
+            <span>${precaution}</span>
+          </li>
+        `).join('');
+      }
+
+      // Display lifestyle recommendations
+      const lifestyleContainer = document.getElementById('lifestyleList');
+      if (data.lifestyle && data.lifestyle.length > 0) {
+        lifestyleContainer.innerHTML = data.lifestyle.map(recommendation => `
+          <li class="flex items-start gap-3">
+            <span class="text-blue-600 font-bold mt-1">★</span>
+            <span>${recommendation}</span>
+          </li>
+        `).join('');
+      }
+
+      // Display follow-up
+      const followUpContainer = document.getElementById('followUpText');
+      if (data.follow_up) {
+        followUpContainer.innerHTML = data.follow_up.split('\n').map(line => {
+          if (line.trim()) {
+            return `<p>${line}</p>`;
+          }
+        }).join('');
+      }
+
+      // Display timestamp
+      document.getElementById('analysisTime').textContent = new Date().toLocaleString();
+    }
+
+    async function updateHealthStats() {
+      try {
+        const response = await fetch('/get_stats');
+        const stats = await response.json();
+        
+        const normalRatio = stats.normal_reports / (stats.total_predictions || 1);
+        const healthScore = Math.round(normalRatio * 100);
+        
+        document.getElementById('healthScore').textContent = healthScore;
+        document.getElementById('riskLevel').textContent = healthScore > 80 ? 'Low' : healthScore > 50 ? 'Medium' : 'High';
+        document.getElementById('nextCheck').textContent = '7 days';
+      } catch (error) {
+        console.error('Stats update error:', error);
+      }
+    }
+
+    async function loadAIInsights() {
+      try {
+        // Load health stats on page load
+        updateHealthStats();
+        
+      } catch (error) {
+        console.error('AI Insights error:', error);
+      }
+    }
+
+    // Update openSection to load AI insights
+    // This needs to be added in the openSection function properly
+
+
+    // Display prediction results
+    function displayResults(data) {
+      const resultDiv = document.getElementById('predictionResult');
+      const resultText = document.getElementById('resultText');
+      
+      currentPdfUrl = data.pdf_url;
+      
+      let html = `<div class="space-y-4">`;
+      html += `<p><strong>Timestamp:</strong> ${new Date(data.timestamp).toLocaleString()}</p>`;
+      html += `<p><strong>Overall Confidence:</strong> ${data.confidence}%</p>`;
+      html += `<hr class="my-4">`;
+      html += `<h4 class="text-xl font-bold mb-3">Detected Conditions:</h4>`;
+      
+      for (const [disease, details] of Object.entries(data.predictions)) {
+        html += `<div class="bg-white p-4 rounded-lg shadow-md mb-3">`;
+        html += `<h5 class="text-lg font-bold text-blue-900">${disease}</h5>`;
+        html += `<p class="text-sm text-gray-600 mb-2">${details.status}</p>`;
+        
+        if (details.relevant_params && details.relevant_params.length > 0) {
+          html += `<div class="mt-2">`;
+          html += `<p class="font-semibold text-sm mb-2">Abnormal Parameters:</p>`;
+          html += `<ul class="space-y-1">`;
+          
+          for (const param of details.relevant_params) {
+            const riskClass = param.risk.label === 'Normal' ? 'risk-normal' : 
+                             param.risk.label === 'Low' ? 'risk-low' : 'risk-high';
+            html += `<li class="text-sm">
+              <strong>${param.parameter}:</strong> ${param.value} 
+              <span class="text-gray-600">(Normal: ${param.normal_range})</span> 
+              <span class="${riskClass} font-bold">${param.risk.label} (${param.risk.percentage}%)</span>
+            </li>`;
+          }
+          html += `</ul></div>`;
+        }
+        html += `</div>`;
+      }
+      
+      html += `</div>`;
+      resultText.innerHTML = html;
+      resultDiv.classList.remove('hidden');
+      
+      // Scroll to results
+      resultDiv.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Download PDF
+    function downloadPDF() {
+      if (currentPdfUrl) {
+        window.open(currentPdfUrl, '_blank');
+      } else {
+        alert('No PDF available');
+      }
+    }
+
+
+    /* ---------- Support / Messaging JS ---------- */
+
+    function clearMessageForm() {
+      document.getElementById('msgSubject').value = '';
+      document.getElementById('msgBody').value = '';
+      document.getElementById('adminSelect').selectedIndex = 0;
+    }
+
+    async function sendAdminMessage() {
+      const admin_id = document.getElementById('adminSelect').value;
+      const subject = document.getElementById('msgSubject').value.trim();
+      const body = document.getElementById('msgBody').value.trim();
+
+      if (!subject || !body) {
+        alert('❌ Please enter a subject and message.');
+        return;
+      }
+
+      const btn = document.getElementById('sendMsgBtn');
+      btn.disabled = true;
+      btn.textContent = '⏳ Sending...';
+
+      try {
+        const response = await fetch('/send_admin_message', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ admin_id: admin_id, subject: subject, message: body })
+        });
+        const data = await response.json();
+
+        if (data.success) {
+          alert('✅ Message sent to admin.');
+          clearMessageForm();
+          loadUserMessages(); // refresh message list
+        } else {
+          alert('❌ ' + (data.error || 'Failed to send'));
+        }
+      } catch (err) {
+        console.error('Send message error:', err);
+        alert('❌ Failed to send message (check console).');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Send Message';
+      }
+    }
+
+    async function loadUserMessages() {
+      try {
+        const response = await fetch('/get_user_messages');
+        const data = await response.json();
+
+        const container = document.getElementById('messagesContainer');
+        if (!container) return;
+
+        if (!data.messages || data.messages.length === 0) {
+          container.innerHTML = '<div class="text-sm text-gray-500">No messages yet. Use the form to send one to an admin.</div>';
+          return;
+        }
+
+        // render messages
+        container.innerHTML = data.messages.map(m => {
+          const side = m.is_admin_reply ? 'bg-blue-50 border-l-4 border-blue-600' : 'bg-white border rounded-lg';
+          const who = m.is_admin_reply ? (m.admin_name || 'Admin') : 'You';
+          const replyTag = m.is_admin_reply ? `<div class="text-xs text-gray-500">Reply from ${m.admin_name} • ${new Date(m.timestamp).toLocaleString()}</div>` :
+                                              `<div class="text-xs text-gray-500">Sent • ${new Date(m.timestamp).toLocaleString()}</div>`;
+
+          return `
+            <div class="${side} p-4 shadow-sm">
+              <div class="flex justify-between items-start">
+                <div>
+                  <div class="font-semibold text-sm">${m.subject}</div>
+                  <div class="text-sm text-gray-700 mt-1">${m.message}</div>
+                </div>
+                <div class="text-right text-xs">${who}</div>
+              </div>
+              <div class="mt-2">${replyTag}</div>
+            </div>
+          `;
+        }).join('');
+      } catch (err) {
+        console.error('Load messages error:', err);
+      }
+    }
+
+    /* When the support section opens, load messages. We hook this into openSection which is used in your dashboard. */
+    (function attachSupportHook() {
+      // override openSection to call loadUserMessages when opening support;
+      const origOpen = openSection;
+      openSection = function(id) {
+        origOpen(id);
+        if (id === 'support') {
+          loadUserMessages();
+          // start polling for replies every 10s while support is open
+          if (!window._supportPoller) {
+            window._supportPoller = setInterval(() => {
+              if (document.getElementById('support') && !document.getElementById('support').classList.contains('hidden')) {
+                loadUserMessages();
+              }
+            }, 10000);
+          }
+        }
+      };
+    })();
+
+
+
+    // Logout
+    function logout() {
+      fetch("/logout").then(() => window.location.href = "/");
+    }
+  </script>
+</body>
+</html>

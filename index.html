@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smart Disease Prediction - Single Drop Blood Analysis</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Smooth quote animation */
+    /* Smooth scrolling animation - IMPROVED VERSION */
+    @keyframes smoothScroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-100%); }
+    }
+    
+    .scrolling-wrapper {
+      overflow: hidden;
+      position: relative;
+      flex: 1;
+      display: flex;
+    }
+    
+    .scrolling-container {
+      display: inline-flex;
+      align-items: center;
+      gap: 3rem;
+      white-space: nowrap;
+      animation: smoothScroll 10s linear infinite;
+      will-change: transform;
+      padding-left: 1rem; /* Gap from the start */
+    }
+    
+    .scrolling-container:hover {
+      animation-play-state: paused;
+    }
+
+
+    /* Mobile responsive */
+    @media (max-width: 768px) {
+      .scrolling-container {
+        animation: smoothScroll 20s linear infinite;
+      }
+      
+      nav ul {
+        flex-direction: column;
+        gap: 0.5rem !important;
+      }
+      
+      nav {
+        display: none; /* Hide nav on very small screens */
+      }
+    }
+    
+    @media (max-width: 1024px) {
+      .scrolling-container {
+        gap: 1.5rem;
+        font-size: 0.875rem;
+      }
+      
+      .scroll-content img {
+        width: 2.5rem !important;
+        height: 2.5rem !important;
+      }
+    }
+
+
+    
+    /* Duplicate content for seamless loop */
+    .scroll-content {
+      display: inline-flex;
+      align-items: center;
+      gap: 1rem;
+      flex-shrink: 0;
+      /* padding-right: 2rem; */
+    }
+
+    /* Custom gradient background */
+    .hero-gradient {
+      background: linear-gradient(135deg, #0c4a6e 0%, #0284c7 50%, #38bdf8 100%);
+    }
+
+    /* Smooth transitions */
+    * {
+      transition: all 0.3s ease;
+    }
+
+     /* Form focus effects */
+    input:focus, select:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px #3b82f6; /* equivalent to ring-2 ring-blue-500 */
+      border-color: #3b82f6;
+    }
+
+    /* Glass morphism effect */
+    .glass-effect {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+  </style>
+</head>
+
+<body class="bg-gradient-to-br from-blue-50 via-white to-blue-50 text-gray-800 font-sans antialiased">
+
+  <!-- HEADER -->
+  <header class="bg-blue-900 from-blue-600 to-blue-500 sticky top-0 z-50 shadow-lg">
+    <div class="max-w-7xl mx-auto flex justify-between items-center px-6 py-4">
+      <!-- Left: Logo + Scrolling Quote -->
+      <!-- Left: Logo + Scrolling Quote -->
+      <div class="flex-1 overflow-hidden scrolling-wrapper">
+        <div class="scrolling-container">
+          <!-- First copy -->
+          <div class="scroll-content">
+            <img src="/static/images/logo.png" alt="Medical Logo" class="w-12 h-12 rounded-full shadow-md bg-white p-1">
+            <span class="text-white text-base font-semibold tracking-wide">
+              Smart Disease Prediction - Safety First with Single Drop of Blood 🩸
+            </span>
+          </div>
+          <!-- Second copy for seamless loop -->
+          <!-- <div class="scroll-content">
+            <img src="/static/images/logo.png" alt="Medical Logo" class="w-12 h-12 rounded-full shadow-md bg-white p-1">
+            <span class="text-white text-base font-semibold tracking-wide">
+              Smart Disease Prediction - Safety First with Single Drop of Blood 🩸
+            </span>
+          </div> -->
+        </div>
+      </div>
+
+
+      <!-- Right: Nav -->
+      <nav class="ml-8">
+        <ul class="flex space-x-8 text-white font-semibold">
+          <li><a href="#home" class="hover:text-blue-200 transition-colors duration-300 text-sm uppercase tracking-wider">Home</a></li>
+          <li><a href="#auth" class="hover:text-blue-200 transition-colors duration-300 text-sm uppercase tracking-wider">Register/Login</a></li>
+          <li><a href="#admins" class="hover:text-blue-200 transition-colors duration-300 text-sm uppercase tracking-wider">Admin Details</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- HERO SECTION -->
+  <section id="home" class="relative flex items-center justify-center h-[90vh] bg-cover bg-center text-center"
+    style="background-image: url('/static/images/BACKGROUND.png');">
+    <div class="bg-black/40 p-8 rounded-xl">
+      <h1 class="text-4xl md:text-5xl font-bold text-white drop-shadow-lg p-5 rounded-lg">
+        Smart Disease<br>Prediction<br>Using Single Drop of Blood
+      </h1>
+      <div class="pt-8">
+        <a href="#auth" 
+           class="inline-block px-10 py-4 bg-white text-blue-600 font-semibold rounded-full shadow-2xl hover:bg-blue-50 hover:scale-105 transform transition-all duration-300">
+          Get Started →
+        </a>
+      </div>
+    </div>
+
+    <!-- Scroll Indicator -->
+    <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+      <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+      </svg>
+    </div>
+
+  </section>
+
+  <!-- AUTH SECTION -->
+  <section id="auth" class="min-h-screen py-20 bg-gradient-to-b from-white to-blue-50 flex items-center justify-center">
+    <div class="max-w-7xl mx-auto w-full px-6">
+      <div class="flex flex-col lg:flex-row items-start justify-between gap-12">
+        <!-- LEFT: Buttons + Forms -->
+        <div class="flex-1 w-full lg:w-1/2 space-y-8">
+          <div class="text-center space-y-3">
+            <h2 class="text-4xl font-bold text-blue-900">Welcome to Smart Disease Prediction</h2>
+            <p class="text-gray-600">One drop, multiple insights — register or login below.</p>
+          </div>
+
+          <!-- Buttons -->
+          <div class="flex justify-center gap-6 mt-8">
+            <button id="showRegister"
+              class="px-10 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-lg hover:bg-blue-700 hover:shadow-xl transform hover:scale-105 transition-all duration-300">
+              Register
+            </button>
+            <button id="showLogin"
+              class="px-10 py-3 bg-white text-blue-600 border-2 border-blue-200 font-semibold rounded-lg shadow-md hover:bg-blue-50 hover:border-blue-300 transform hover:scale-105 transition-all duration-300">
+              Login
+            </button>
+          </div>
+
+          <!-- REGISTER FORM -->
+          <form id="registerForm" class="hidden bg-blue-50 border border-blue-100 p-6 rounded-xl mt-8 shadow-lg space-y-4">
+            <h3 class="text-2xl font-bold text-blue-700 text-center mb-6">Create Account</h3>
+            <input id="regName" type="text" placeholder="Full Name" required class="w-full p-4 rounded-md border focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+            <select id="regGender" class="w-full p-3 rounded-md border text-gray-600" required>
+              <option value="">Select Gender</option>
+              <option>Male</option><option>Female</option><option>Other</option>
+            </select>
+            <input id="regDob" type="date" required class="w-full p-3 rounded-md border" />
+            <input id="regMobile" type="text" placeholder="Mobile Number" required class="w-full p-3 rounded-md border" />
+
+            <!-- Mobile OTP -->
+            <div class="flex gap-2">
+              <button id="sendMobileOtp" type="button"
+                class="flex-1 bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">Send OTP</button>
+              <input id="mobileOtp" type="number" placeholder="Enter Mobile OTP" class="flex-1 p-3 border rounded-md" />
+              <button id="verifyMobileOtp" type="button"
+                class="flex-1 bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">Verify OTP</button>
+            </div>
+
+            <input id="regEmail" type="email" placeholder="Gmail" required class="w-full p-3 rounded-md border" />
+
+            <!-- Email OTP -->
+            <div class="flex gap-2">
+              <button id="sendEmailOtp" type="button"
+                class="flex-1 bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">Send OTP</button>
+              <input id="emailOtp" type="number" placeholder="Enter Email OTP" class="flex-1 p-3 border rounded-md" />
+              <button id="verifyEmailOtp" type="button"
+                class="flex-1 bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">Verify OTP</button>
+            </div>
+
+            <input id="regPass" type="password" placeholder="Create Password" required class="w-full p-3 rounded-md border" />
+            <input id="regConfirm" type="password" placeholder="Confirm Password" required class="w-full p-3 rounded-md border" />
+
+            <button type="submit"
+              class="w-full bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700 transition">Register</button>
+          </form>
+
+          <!-- LOGIN FORM -->
+          <form id="loginForm" class="hidden glass-effect p-8 rounded-2xl shadow-2xl space-y-5 transform transition-all duration-500">
+            <h3 class="text-2xl font-bold text-blue-700 text-center mb-6">Login</h3>
+            <input id="loginUser" type="text" placeholder="Mobile or Gmail" required class="w-full p-4 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all" />
+            <input id="loginPass" type="password" placeholder="Password" required class="w-full p-4 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all" />
+            
+            <!-- NEW: Forgot Password Link -->
+            <div class="text-right">
+              <button type="button" id="showForgotPassword" class="text-blue-600 hover:text-blue-800 text-sm font-semibold underline">
+                Forgot Password?
+              </button>
+            </div>
+
+            <button type="submit"
+              class="w-full bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700 transition">Login</button>
+          </form>
+        </div>
+      
+        <!-- FORGOT PASSWORD FORM -->
+        <form id="forgotPasswordForm" class="hidden glass-effect p-8 rounded-2xl shadow-2xl space-y-5 transform transition-all duration-500">
+          <h3 class="text-2xl font-bold text-blue-700 text-center mb-6">Reset Password</h3>
+          
+          <!-- Step 1: Enter Email/Mobile -->
+          <div id="forgotStep1">
+            <p class="text-gray-600 text-sm text-center">Enter your registered email or mobile number to receive OTP</p>
+            <input id="forgotIdentifier" type="text" placeholder="Enter Email or Mobile" required 
+                  class="w-full p-4 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all" />
+            
+            <button type="button" id="sendResetOtp" 
+                    class="w-full mt-4 bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700 transition">
+              Send OTP
+            </button>
+          </div>
+          
+          <!-- Step 2: Verify OTP -->
+          <div id="forgotStep2" class="hidden">
+            <input id="resetOtp" type="text" placeholder="Enter OTP" maxlength="4" required 
+                  class="w-full p-4 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all" />
+            
+            <button type="button" id="verifyResetOtp" 
+                    class="w-full mt-4 bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700 transition">
+              Verify OTP
+            </button>
+          </div>
+          
+          <!-- Step 3: Reset Password -->
+          <div id="forgotStep3" class="hidden">
+            <p class="text-gray-600 text-sm text-center">Create a new strong password</p>
+            <input id="newPassword" type="password" placeholder="New Password" required 
+                  class="w-full p-4 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all mb-4" />
+            
+            <input id="confirmNewPassword" type="password" placeholder="Confirm New Password" required 
+                  class="w-full p-4 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all" />
+            
+            <button type="submit" 
+                    class="w-full mt-4 bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700 transition">
+              Reset Password
+            </button>
+          </div>
+          
+          <!-- Back to Login Link -->
+          <div class="text-center mt-4">
+            <button type="button" id="backToLogin" class="text-blue-600 hover:text-blue-800 text-sm font-semibold flex items-center justify-center gap-2 mx-auto transition-colors">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+              </svg>
+              ← Back to Login
+            </button>
+          </div>
+        </form>
+
+
+
+        <!-- RIGHT: IMAGE - Fixed Position -->
+        <div class="flex-1 w-full lg:w-1/2 lg:sticky lg:top-24 self-start">
+          <div class="relative flex justify-center">
+            <img src="/static/images/sensor-drop.png" alt="Blood Drop Sensor" 
+                class="max-w-md w-full drop-shadow-2xl transform hover:scale-105 transition-transform duration-500">
+            <!-- Decorative Elements -->
+            <div class="absolute -top-10 -left-10 w-20 h-20 bg-blue-200 rounded-full opacity-50 blur-xl"></div>
+            <div class="absolute -bottom-10 -right-10 w-32 h-32 bg-blue-300 rounded-full opacity-30 blur-2xl"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+
+
+<!-- Admin Details Section -->
+<section id="admins" class="min-h-screen py-20 bg-gradient-to-b from-blue-50 to-white">
+  <div class="max-w-7xl mx-auto px-6">
+    <!-- Section Header -->
+    <div class="text-center mb-16">
+      <h2 class="text-4xl font-bold text-blue-900 mb-4">Meet Our Admin Team</h2>
+      <p class="text-lg text-gray-600 max-w-2xl mx-auto">Contact our dedicated team for support, maintenance, or any account-related queries. We're here to help you 24/7.</p>
+    </div>
+
+    <!-- Admin Cards Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-6">
+
+      <!-- Admin Card 1 -->
+      <article class="bg-white rounded-2xl p-6 shadow-xl hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 border border-blue-100">
+        <div class="flex flex-col items-center text-center mb-4">
+          <div class="relative mb-4">
+            <img src="static/admin_profiles/admin1.jpg" alt="Admin 1" class="w-24 h-24 rounded-full object-cover border-4 border-blue-200 shadow-lg">
+            <div class="absolute -bottom-2 -right-2 bg-green-500 w-6 h-6 rounded-full border-2 border-white"></div>
+          </div>
+          
+          <h3 class="text-lg font-bold text-blue-900 mb-1">MATAM SANGAMESWARA SWAMY</h3>
+          <p class="text-sm text-blue-600 font-semibold mb-1">System Admin</p>
+          <p class="text-xs text-gray-500 mb-3">Clinical Systems</p>
+          
+          <span class="inline-block px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">
+            🟢 Available Now
+          </span>
+        </div>
+
+        <div class="space-y-3 text-sm border-t border-gray-100 pt-4">
+          <div class="flex items-center gap-2 text-gray-700">
+            <svg class="w-4 h-4 text-blue-600 flex-shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19 19 0 0 1 3 5.18 2 2 0 0 1 5 3h3a2 2 0 0 1 2 1.72c.12 1.21.38 2.39.76 3.5a2 2 0 0 1-.45 2.11L9.91 11.09a16 16 0 0 0 6 6l1.76-1.43a2 2 0 0 1 2.11-.45c1.11.38 2.29.64 3.5.76A2 2 0 0 1 22 16.92z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="break-all">+91 78920 26108</span>
+          </div>
+
+          <div class="flex items-center gap-2 text-gray-700">
+            <svg class="w-4 h-4 text-blue-600 flex-shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 4h16v16H4z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 6l-10 7L2 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="break-all text-xs">sangamesh.ds.rymec@gmail.com</span>
+          </div>
+
+          <a href="https://linkedin.com/in/YOUR_LINKEDIN_USERNAME" target="_blank" rel="noopener noreferrer" 
+             class="flex items-center justify-center gap-2 text-blue-600 hover:text-blue-700 font-semibold mt-2 p-2 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" 
+                    fill="currentColor"/>
+            </svg>
+            <span>www.linkedin.com/in/matam-sangameswara</span>
+          </a>
+
+          <a href="https://instagram.com/sws_94494" target="_blank" rel="noopener noreferrer" 
+             class="flex items-center justify-center gap-2 text-pink-600 hover:text-pink-700 font-semibold mt-4 p-2 bg-pink-50 rounded-lg hover:bg-pink-100 transition-colors">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" stroke-width="1.5"/><path d="M16 11.37A4 4 0 1 1 12.63 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor"/></svg>
+            <span>@sws_94494</span>
+          </a>
+
+
+        </div>
+      </article>
+
+      <!-- Admin Card 2 -->
+      <article class="bg-white rounded-2xl p-6 shadow-xl hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 border border-blue-100">
+        <div class="flex flex-col items-center text-center mb-4">
+          <div class="relative mb-4">
+            <img src="static/admin_profiles/admin2.jpg" alt="Admin 2" class="w-24 h-24 rounded-full object-cover border-4 border-blue-200 shadow-lg">
+            <div class="absolute -bottom-2 -right-2 bg-green-500 w-6 h-6 rounded-full border-2 border-white"></div>
+          </div>
+          
+          <h3 class="text-lg font-bold text-blue-900 mb-1">H MALLIKARJUNA</h3>
+          <p class="text-sm text-blue-600 font-semibold mb-1">Support Lead</p>
+          <p class="text-xs text-gray-500 mb-3">User Onboarding</p>
+          
+          <span class="inline-block px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">
+            🟢 Available Now
+          </span>
+        </div>
+
+        <div class="space-y-3 text-sm border-t border-gray-100 pt-4">
+          <div class="flex items-center gap-2 text-gray-700">
+            <svg class="w-4 h-4 text-blue-600 flex-shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19 19 0 0 1 3 5.18 2 2 0 0 1 5 3h3a2 2 0 0 1 2 1.72c.12 1.21.38 2.39.76 3.5a2 2 0 0 1-.45 2.11L9.91 11.09a16 16 0 0 0 6 6l1.76-1.43a2 2 0 0 1 2.11-.45c1.11.38 2.29.64 3.5.76A2 2 0 0 1 22 16.92z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="break-all">+91 96063 03197</span>
+          </div>
+
+          <div class="flex items-center gap-2 text-gray-700">
+            <svg class="w-4 h-4 text-blue-600 flex-shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 4h16v16H4z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 6l-10 7L2 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="break-all text-xs">hmallikarjuna.ds.rymec@gmail.com</span>
+          </div>
+
+          <a href="https://linkedin.com/in/YOUR_LINKEDIN_USERNAME" target="_blank" rel="noopener noreferrer" 
+             class="flex items-center justify-center gap-2 text-blue-600 hover:text-blue-700 font-semibold mt-2 p-2 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" 
+                    fill="currentColor"/>
+            </svg>
+            <span>LinkedIn Profile</span>
+          </a>
+
+          <a href="https://instagram.com/malli98_._" target="_blank" rel="noopener noreferrer" 
+             class="flex items-center justify-center gap-2 text-pink-600 hover:text-pink-700 font-semibold mt-4 p-2 bg-pink-50 rounded-lg hover:bg-pink-100 transition-colors">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" stroke-width="1.5"/><path d="M16 11.37A4 4 0 1 1 12.63 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor"/></svg>
+            <span>@malli98_._</span>
+          </a>
+        </div>
+      </article>
+
+      <!-- Admin Card 3 -->
+      <article class="bg-white rounded-2xl p-6 shadow-xl hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 border border-blue-100">
+        <div class="flex flex-col items-center text-center mb-4">
+          <div class="relative mb-4">
+            <img src="static/admin_profiles/admin3.jpg" alt="Admin 3" class="w-24 h-24 rounded-full object-cover border-4 border-blue-200 shadow-lg">
+            <div class="absolute -bottom-2 -right-2 bg-green-500 w-6 h-6 rounded-full border-2 border-white"></div>
+          </div>
+          
+          <h3 class="text-lg font-bold text-blue-900 mb-1">HEMANTH NAIK K B</h3>
+          <p class="text-sm text-blue-600 font-semibold mb-1">Hardware Lead</p>
+          <p class="text-xs text-gray-500 mb-3">Sensor Integration</p>
+          
+          <span class="inline-block px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">
+            🟢 Available Now
+          </span>
+        </div>
+
+        <div class="space-y-3 text-sm border-t border-gray-100 pt-4">
+          <div class="flex items-center gap-2 text-gray-700">
+            <svg class="w-4 h-4 text-blue-600 flex-shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19 19 0 0 1 3 5.18 2 2 0 0 1 5 3h3a2 2 0 0 1 2 1.72c.12 1.21.38 2.39.76 3.5a2 2 0 0 1-.45 2.11L9.91 11.09a16 16 0 0 0 6 6l1.76-1.43a2 2 0 0 1 2.11-.45c1.11.38 2.29.64 3.5.76A2 2 0 0 1 22 16.92z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="break-all">+91 90199 19486</span>
+          </div>
+
+          <div class="flex items-center gap-2 text-gray-700">
+            <svg class="w-4 h-4 text-blue-600 flex-shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 4h16v16H4z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 6l-10 7L2 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="break-all text-xs">hemanth.ds.rymec@gmail.com</span>
+          </div>
+
+          <a href="https://linkedin.com/in/YOUR_LINKEDIN_USERNAME" target="_blank" rel="noopener noreferrer" 
+             class="flex items-center justify-center gap-2 text-blue-600 hover:text-blue-700 font-semibold mt-2 p-2 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" 
+                    fill="currentColor"/>
+            </svg>
+            <span>LinkedIn Profile</span>
+          </a>
+
+          <a href="https://instagram.com/kiran_hw" target="_blank" rel="noopener noreferrer" 
+             class="flex items-center justify-center gap-2 text-pink-600 hover:text-pink-700 font-semibold mt-4 p-2 bg-pink-50 rounded-lg hover:bg-pink-100 transition-colors">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" stroke-width="1.5"/><path d="M16 11.37A4 4 0 1 1 12.63 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor"/></svg>
+            <span>@kiran_hw</span>
+          </a>
+        </div>
+      </article>
+
+      <!-- Admin Card 4 -->
+      <article class="bg-white rounded-2xl p-6 shadow-xl hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 border border-blue-100">
+        <div class="flex flex-col items-center text-center mb-4">
+          <div class="relative mb-4">
+            <img src="static/admin_profiles/admin4.jpg" alt="Admin 4" class="w-24 h-24 rounded-full object-cover border-4 border-blue-200 shadow-lg">
+            <div class="absolute -bottom-2 -right-2 bg-green-500 w-6 h-6 rounded-full border-2 border-white"></div>
+          </div>
+          
+          <h3 class="text-lg font-bold text-blue-900 mb-1">SANTHOSH K</h3>
+          <p class="text-sm text-blue-600 font-semibold mb-1">Clinical Advisor</p>
+          <p class="text-xs text-gray-500 mb-3">Diagnostics</p>
+          
+          <span class="inline-block px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">
+            🟢 Available Now
+          </span>
+        </div>
+
+        <div class="space-y-3 text-sm border-t border-gray-100 pt-4">
+          <div class="flex items-center gap-2 text-gray-700">
+            <svg class="w-4 h-4 text-blue-600 flex-shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19 19 0 0 1 3 5.18 2 2 0 0 1 5 3h3a2 2 0 0 1 2 1.72c.12 1.21.38 2.39.76 3.5a2 2 0 0 1-.45 2.11L9.91 11.09a16 16 0 0 0 6 6l1.76-1.43a2 2 0 0 1 2.11-.45c1.11.38 2.29.64 3.5.76A2 2 0 0 1 22 16.92z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="break-all">+91 98444 89692</span>
+          </div>
+
+          <div class="flex items-center gap-2 text-gray-700">
+            <svg class="w-4 h-4 text-blue-600 flex-shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 4h16v16H4z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 6l-10 7L2 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="break-all text-xs">santoshkoteli.ds.rymec@gmail.com</span>
+          </div>
+
+
+          <a href="https://linkedin.com/in/YOUR_LINKEDIN_USERNAME" target="_blank" rel="noopener noreferrer" 
+             class="flex items-center justify-center gap-2 text-blue-600 hover:text-blue-700 font-semibold mt-2 p-2 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" 
+                    fill="currentColor"/>
+            </svg>
+            <span>LinkedIn Profile</span>
+          </a>
+
+          <a href="https://instagram.com/dr_meera" target="_blank" rel="noopener noreferrer" 
+             class="flex items-center justify-center gap-2 text-pink-600 hover:text-pink-700 font-semibold mt-4 p-2 bg-pink-50 rounded-lg hover:bg-pink-100 transition-colors">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" stroke-width="1.5"/><path d="M16 11.37A4 4 0 1 1 12.63 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor"/></svg>
+            <span>@dr_meera</span>
+          </a>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+<!-- End Admin Details Section -->
+
+
+
+
+
+
+
+
+   <!-- FOOTER -->
+  <footer class="bg-blue-900 text-white py-6 text-center">
+    <p class="text-sm">&copy; 2025 Smart Disease Prediction System. All rights reserved.</p>
+    <p class="text-xs text-blue-300 mt-2">Powered by Advanced Blood Analysis Technology</p>
+  </footer>
+
+  <script>
+    // Track OTP verification status
+    let mobileVerified = false;
+    let emailVerified = false;
+    // Buttons and forms toggling
+    const showRegister = document.getElementById('showRegister');
+    const showLogin = document.getElementById('showLogin');
+    const regForm = document.getElementById('registerForm');
+    const loginForm = document.getElementById('loginForm');
+
+    showRegister.addEventListener('click', () => {
+      regForm.classList.remove('hidden');
+      loginForm.classList.add('hidden');
+      showRegister.classList.add('bg-blue-600','text-white');
+      showLogin.classList.remove('bg-blue-600','text-white');
+      showLogin.classList.add('bg-gray-200','text-blue-700');
+    });
+
+    showLogin.addEventListener('click', () => {
+      loginForm.classList.remove('hidden');
+      regForm.classList.add('hidden');
+      showLogin.classList.add('bg-blue-600','text-white');
+      showRegister.classList.remove('bg-blue-600','text-white');
+      showRegister.classList.add('bg-gray-200','text-blue-700');
+    });
+
+    // Send OTP - Simulated
+    document.getElementById("sendMobileOtp").addEventListener("click", async () => {
+      const mobile = document.getElementById("regMobile").value.trim();
+
+      if (!mobile) {
+        alert("Please enter your mobile number first!");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("mobile", mobile);
+
+      const response = await fetch("/send_otp", {
+        method: "POST",
+        body: formData
+      });
+
+      const text = await response.text();
+      alert(text);
+    });
+      // Verify Mobile OTP
+    document.getElementById("verifyMobileOtp").addEventListener("click", async () => {
+      const mobile = document.getElementById("regMobile").value.trim();
+      const otp = document.getElementById("mobileOtp").value.trim();
+
+      if (!mobile || !otp) {
+        alert("Please enter mobile number and OTP!");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("mobile", mobile);
+      formData.append("otp", otp);
+
+      const response = await fetch("/verify_otp", {
+        method: "POST",
+        body: formData
+      });
+
+      const text = await response.text();
+      alert(text);
+      
+      if (response.ok) {
+        mobileVerified = true;
+        document.getElementById("verifyMobileOtp").classList.add("bg-green-700");
+        document.getElementById("verifyMobileOtp").textContent = "✓ Verified";
+      }
+    });
+
+    // Send Email OTP
+    document.getElementById('sendEmailOtp').addEventListener('click', async () => {
+      const email = document.getElementById('regEmail').value.trim();
+      if (!email) {
+        alert('Please enter your email first!');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("email", email);
+
+      const response = await fetch('/send_email_otp', {
+        method: 'POST',
+        body: formData
+      });
+
+      const text = await response.text();
+      alert(text);
+    });
+
+    // Verify Email OTP
+    document.getElementById("verifyEmailOtp").addEventListener("click", async () => {
+      const email = document.getElementById("regEmail").value.trim();
+      const otp = document.getElementById("emailOtp").value.trim();
+
+      if (!email || !otp) {
+        alert("Please enter email and OTP!");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("email", email);
+      formData.append("otp", otp);
+
+      const response = await fetch("/verify_email_otp", {
+        method: "POST",
+        body: formData
+      });
+
+      const text = await response.text();
+      alert(text);
+      
+      if (response.ok) {
+        emailVerified = true;
+        document.getElementById("verifyEmailOtp").classList.add("bg-green-700");
+        document.getElementById("verifyEmailOtp").textContent = "✓ Verified";
+      }
+    });
+
+    // Registration
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      if (!mobileVerified) {
+        alert('Please verify Mobile OTP first!');
+        return;
+      }
+
+      if (!emailVerified) {
+        alert('Please verify Email OTP first!');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('name', document.getElementById('regName').value);
+      formData.append('dob', document.getElementById('regDob').value);
+      formData.append('mobile', document.getElementById('regMobile').value);
+      formData.append('gmail', document.getElementById('regEmail').value);
+      formData.append('password', document.getElementById('regPass').value);
+
+      const confirmPass = document.getElementById('regConfirm').value;
+      if (formData.get('password') !== confirmPass) {
+        alert('Passwords do not match!');
+        return;
+      }
+
+      try {
+        const response = await fetch('/register', {
+          method: 'POST',
+          body: formData
+        });
+
+        const text = await response.text();
+        alert(text);
+
+        if (response.ok) {
+          // ✅ Reset form and verification status
+          mobileVerified = false;
+          emailVerified = false;
+          document.getElementById('registerForm').reset();
+          
+          // ✅ Switch to login form
+          regForm.classList.add('hidden');
+          loginForm.classList.remove('hidden');
+          showLogin.classList.add('bg-blue-600','text-white');
+          showRegister.classList.remove('bg-blue-600','text-white');
+          showRegister.classList.add('bg-gray-200','text-blue-700');
+          
+          alert('Registration successful! Please login now.');
+        }
+      } catch (error) {
+        console.error('Registration error:', error);
+        alert('Registration failed. Please try again.');
+      }
+    });
+
+    // Login
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const loginValue = document.getElementById('loginUser').value.trim();
+      const password = document.getElementById('loginPass').value.trim();
+
+      if (!loginValue || !password) {
+        alert('Please enter both username and password!');
+      return;
+      }
+
+      console.log('Attempting login...'); // Debug log
+      const formData = new FormData();
+      formData.append('mobile', loginValue);
+      formData.append('gmail', loginValue);
+      formData.append('password', document.getElementById('loginPass').value);
+
+      try {
+          const response = await fetch('/login', {
+            method: 'POST',
+            body: formData
+          });
+
+          const text = await response.text();
+          console.log('Login response:', response.status, text); // Debug log
+
+          if (response.ok) {
+            alert('Login successful! Redirecting to dashboard...');
+            window.location.href = "/dashboard";
+          } else {
+            alert('Login failed: ' + text);
+          }
+        } catch (error) {
+          console.error('Login error:', error);
+          alert('Login failed. Please try again.');
+        }
+      });
+
+    document.getElementById('sendEmailOtp').addEventListener('click', () => {
+      const email = document.getElementById('regEmail').value;
+      if (!email) return alert('Enter Gmail first');
+      fetch('http://127.0.0.1:5000/send_email_otp', { // same route for demo
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ gmail: gmail })
+      })
+      .then(res => res.text())
+      .then(data => alert(data))
+      .catch(err => alert('Error: ' + err));
+    });
+
+
+
+// ------------------ Forgot Password Handlers ------------------
+const forgotPasswordForm = document.getElementById('forgotPasswordForm');
+let forgotPasswordIdentifier = '';
+
+// Show forgot password form
+document.getElementById('showForgotPassword').addEventListener('click', () => {
+  loginForm.classList.add('hidden');
+  forgotPasswordForm.classList.remove('hidden');
+  
+  // Reset form
+  document.getElementById('forgotStep1').classList.remove('hidden');
+  document.getElementById('forgotStep2').classList.add('hidden');
+  document.getElementById('forgotStep3').classList.add('hidden');
+});
+
+// Back to login
+document.getElementById('backToLogin').addEventListener('click', () => {
+  forgotPasswordForm.classList.add('hidden');
+  loginForm.classList.remove('hidden');
+  document.getElementById('forgotPasswordForm').reset();
+});
+
+// Send Reset OTP
+document.getElementById('sendResetOtp').addEventListener('click', async () => {
+  const identifier = document.getElementById('forgotIdentifier').value.trim();
+  
+  if (!identifier) {
+    alert('Please enter your email or mobile number!');
+    return;
+  }
+  
+  try {
+    const response = await fetch('/send_reset_otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ identifier })
+    });
+    
+    const data = await response.json();
+    
+    if (response.ok) {
+      forgotPasswordIdentifier = identifier;
+      alert(data.message || 'OTP sent successfully! Check terminal.');
+      
+      // Move to step 2
+      document.getElementById('forgotStep1').classList.add('hidden');
+      document.getElementById('forgotStep2').classList.remove('hidden');
+    } else {
+      alert(data.error || 'Failed to send OTP');
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    alert('Failed to send OTP. Please try again.');
+  }
+});
+
+// Verify Reset OTP
+document.getElementById('verifyResetOtp').addEventListener('click', async () => {
+  const otp = document.getElementById('resetOtp').value.trim();
+  
+  if (!otp) {
+    alert('Please enter the OTP!');
+    return;
+  }
+  
+  try {
+    const response = await fetch('/verify_reset_otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        identifier: forgotPasswordIdentifier, 
+        otp 
+      })
+    });
+    
+    const data = await response.json();
+    
+    if (response.ok) {
+      alert('OTP verified! Please enter your new password.');
+      
+      // Move to step 3
+      document.getElementById('forgotStep2').classList.add('hidden');
+      document.getElementById('forgotStep3').classList.remove('hidden');
+    } else {
+      alert(data.error || 'Invalid OTP');
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    alert('Failed to verify OTP. Please try again.');
+  }
+});
+
+// Reset Password Form Submit
+forgotPasswordForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const newPassword = document.getElementById('newPassword').value.trim();
+  const confirmPassword = document.getElementById('confirmNewPassword').value.trim();
+  
+  if (!newPassword || !confirmPassword) {
+    alert('Please fill in all fields!');
+    return;
+  }
+  
+  if (newPassword !== confirmPassword) {
+    alert('Passwords do not match!');
+    return;
+  }
+  
+  if (newPassword.length < 6) {
+    alert('Password must be at least 6 characters long!');
+    return;
+  }
+  
+  try {
+    const response = await fetch('/reset_password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        identifier: forgotPasswordIdentifier,
+        new_password: newPassword,
+        confirm_password: confirmPassword
+      })
+    });
+    
+    const data = await response.json();
+    
+    if (response.ok) {
+      alert('Password reset successfully! Please login with your new password.');
+      
+      // Go back to login form
+      forgotPasswordForm.classList.add('hidden');
+      loginForm.classList.remove('hidden');
+      document.getElementById('forgotPasswordForm').reset();
+      forgotPasswordIdentifier = '';
+    } else {
+      alert(data.error || 'Failed to reset password');
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    alert('Failed to reset password. Please try again.');
+  }
+});
+
+
+
+
+    // Registration
+    // document.getElementById('registerForm').addEventListener('submit', async (e) => {
+    //   e.preventDefault();
+    //   alert('Registration successful! Redirecting to Login...');
+    //   regForm.classList.add('hidden');
+    //   loginForm.classList.remove('hidden');
+    //   document.getElementById('showLogin').click();
+    // });
+
+    // Login redirect
+    // document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    //   e.preventDefault();
+    //   window.location.href = "/dashboard"; // adjust route if needed
+    // });
+  </script>
+</body>
+</html>
